@@ -41,6 +41,7 @@ import { getMonoVersion } from '../utils/getMonoVersion';
 import { FixAllProvider } from '../features/fixAllProvider';
 import { LanguageMiddlewareFeature } from './LanguageMiddlewareFeature';
 import SemanticTokensProvider from '../features/semanticTokensProvider';
+import fileOpenClose from '../features/fileOpenCloseProvider';
 
 export interface ActivationResult {
     readonly server: OmniSharpServer;
@@ -100,6 +101,7 @@ export async function activate(context: vscode.ExtensionContext, packageJSON: an
         const fixAllProvider = new FixAllProvider(server, languageMiddlewareFeature);
         localDisposables.add(fixAllProvider);
         localDisposables.add(vscode.languages.registerCodeActionsProvider(documentSelector, fixAllProvider));
+        localDisposables.add(fileOpenClose(server));
         localDisposables.add(reportDiagnostics(server, advisor, languageMiddlewareFeature));
         localDisposables.add(forwardChanges(server));
         localDisposables.add(trackVirtualDocuments(server, eventStream));

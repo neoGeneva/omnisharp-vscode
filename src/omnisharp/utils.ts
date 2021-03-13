@@ -187,6 +187,14 @@ export async function isNetCoreProject(project: protocol.MSBuildProject) {
     return project.TargetFrameworks.find(tf => tf.ShortName.startsWith('netcoreapp') || tf.ShortName.startsWith('netstandard')) !== undefined;
 }
 
+export async function fileOpen(server: OmniSharpServer, request: protocol.Request, token: vscode.CancellationToken) {
+    return server.makeRequest<unknown>(protocol.Requests.FileOpen, request, token);
+}
+
+export async function fileClose(server: OmniSharpServer, request: protocol.Request, token: vscode.CancellationToken) {
+    return server.makeRequest<unknown>(protocol.Requests.FileClose, request, token);
+}
+
 function isBlazorWebAssemblyHosted(project: protocol.MSBuildProject, isProjectBlazorWebAssemblyProject: boolean): boolean {
     if (!isProjectBlazorWebAssemblyProject) {
         return false;

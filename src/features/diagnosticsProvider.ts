@@ -157,6 +157,7 @@ class DiagnosticsProvider extends AbstractSupport {
             this._server.onPackageRestore(() => this._validateAllPipe.next(), this),
             this._server.onProjectChange(() => this._validateAllPipe.next(), this),
             this._server.onProjectDiagnosticStatus(this._onProjectAnalysis, this),
+            this._server.onDiagnostic(this._onDiagnosticUpdate, this),
             vscode.workspace.onDidOpenTextDocument(event => this._onDocumentOpenOrChange(event), this),
             vscode.workspace.onDidChangeTextDocument(event => this._onDocumentOpenOrChange(event.document), this),
             vscode.workspace.onDidCloseTextDocument(this._onDocumentClose, this),
@@ -233,30 +234,46 @@ class DiagnosticsProvider extends AbstractSupport {
             let source = new vscode.CancellationTokenSource();
             try {
                 let value = await serverUtils.codeCheck(this._server, { FileName: document.fileName }, source.token);
-                let quickFixes = value.QuickFixes;
-                // Easy case: If there are no diagnostics in the file, we can clear it quickly.
-                if (quickFixes.length === 0) {
-                    if (this._diagnostics.has(document.uri)) {
-                        this._diagnostics.delete(document.uri);
-                    }
 
-                    return;
-                }
-
-                // No problems published for virtual files
-                if (isVirtualCSharpDocument(document)) {
-                    return;
-                }
-
-                // (re)set new diagnostics for this document
-                let diagnosticsInFile = this._mapQuickFixesAsDiagnosticsInFile(quickFixes);
-
-                this._diagnostics.set(document.uri, diagnosticsInFile.map(x => x.diagnostic));
+                this._setDocumentQuickFixes(document, value.QuickFixes);
             }
             catch (error) {
                 return;
             }
         }, 2000);
+    }
+
+    private _onDiagnosticUpdate(message: protocol.DiagnosticMessage) {
+        for (const item of message.Results) {
+            const document = vscode.workspace.textDocuments.find(x => x.fileName === item.FileName);
+
+            if (!document) {
+                return;
+            }
+
+            this._setDocumentQuickFixes(document, item.QuickFixes);
+        }
+    }
+
+    private _setDocumentQuickFixes(document: vscode.TextDocument, quickFixes: protocol.QuickFix[]) {
+        // Easy case: If there are no diagnostics in the file, we can clear it quickly.
+        if (quickFixes.length === 0) {
+            if (this._diagnostics.has(document.uri)) {
+                this._diagnostics.delete(document.uri);
+            }
+
+            return;
+        }
+
+        // No problems published for virtual files
+        if (isVirtualCSharpDocument(document)) {
+            return;
+        }
+
+        // (re)set new diagnostics for this document
+        let diagnosticsInFile = this._mapQuickFixesAsDiagnosticsInFile(quickFixes);
+
+        this._diagnostics.set(document.uri, diagnosticsInFile.map(x => x.diagnostic));
     }
 
     // On large workspaces (if maxProjectFileCountForDiagnosticAnalysis) is less than workspace size,

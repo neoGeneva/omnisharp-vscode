@@ -35,6 +35,8 @@ export module Requests {
     export const Completion = '/completion';
     export const CompletionResolve = '/completion/resolve';
     export const CompletionAfterInsert = '/completion/afterInsert';
+    export const FileOpen = '/open';
+    export const FileClose = '/close';
 }
 
 export namespace WireProtocol {
@@ -292,6 +294,13 @@ export interface ProjectDiagnosticStatus {
     Status: DiagnosticStatus;
     ProjectFilePath: string;
     Type: "background";
+}
+
+export interface DiagnosticMessage {
+    Results: {
+        FileName: string;
+        QuickFixes: QuickFix[];
+    }[];
 }
 
 export interface WorkspaceInformationResponse {

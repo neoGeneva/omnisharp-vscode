@@ -57,6 +57,7 @@ module Events {
     export const ProjectRemoved = 'ProjectRemoved';
 
     export const ProjectDiagnosticStatus = 'ProjectDiagnosticStatus';
+    export const Diagnostic = 'Diagnostic';
 
     export const MsBuildProjectDiagnostics = 'MsBuildProjectDiagnostics';
 
@@ -203,6 +204,10 @@ export class OmniSharpServer {
 
     public onProjectDiagnosticStatus(listener: (e: protocol.ProjectDiagnosticStatus) => any, thisArg?: any) {
         return this._addListener(Events.ProjectDiagnosticStatus, listener, thisArg);
+    }
+
+    public onDiagnostic(listener: (e: protocol.DiagnosticMessage) => any, thisArg?: any) {
+        return this._addListener(Events.Diagnostic, listener, thisArg);
     }
 
     public onMsBuildProjectDiagnostics(listener: (e: protocol.MSBuildProjectDiagnostics) => any, thisArg?: any) {
