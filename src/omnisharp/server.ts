@@ -361,6 +361,10 @@ export class OmniSharpServer {
             args.push('RoslynExtensionsOptions:EnableAnalyzersSupport=true');
         }
 
+        if (options.analyzeOpenDocumentsOnly === true) {
+            args.push('RoslynExtensionsOptions:AnalyzeOpenDocumentsOnly=true');
+        }
+
         if (options.enableEditorConfigSupport === true) {
             args.push('FormattingOptions:EnableEditorConfigSupport=true');
         }

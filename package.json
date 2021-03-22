@@ -800,6 +800,11 @@
           "default": false,
           "description": "Enables support for roslyn analyzers, code fixes and rulesets."
         },
+        "omnisharp.analyzeOpenDocumentsOnly": {
+          "type": "boolean",
+          "default": false,
+          "description": "Will only run analyzers against open files when 'enableRoslynAnalyzers' is true"
+        },
         "omnisharp.enableEditorConfigSupport": {
           "type": "boolean",
           "default": true,

@@ -29,6 +29,7 @@ export class Options {
         public razorDevMode: boolean,
         public enableMsBuildLoadProjectsOnDemand: boolean,
         public enableRoslynAnalyzers: boolean,
+        public analyzeOpenDocumentsOnly: boolean,
         public enableEditorConfigSupport: boolean,
         public enableDecompilationSupport: boolean,
         public enableImportCompletion: boolean,
@@ -73,6 +74,7 @@ export class Options {
         const useEditorFormattingSettings = omnisharpConfig.get<boolean>('useEditorFormattingSettings', true);
 
         const enableRoslynAnalyzers = omnisharpConfig.get<boolean>('enableRoslynAnalyzers', false);
+        const analyzeOpenDocumentsOnly = omnisharpConfig.get<boolean>('analyzeOpenDocumentsOnly', false);
         const enableEditorConfigSupport = omnisharpConfig.get<boolean>('enableEditorConfigSupport', false);
         const enableDecompilationSupport = omnisharpConfig.get<boolean>('enableDecompilationSupport', false);
         const enableImportCompletion = omnisharpConfig.get<boolean>('enableImportCompletion', false);
@@ -129,6 +131,7 @@ export class Options {
             razorDevMode,
             enableMsBuildLoadProjectsOnDemand,
             enableRoslynAnalyzers,
+            analyzeOpenDocumentsOnly,
             enableEditorConfigSupport,
             enableDecompilationSupport,
             enableImportCompletion,

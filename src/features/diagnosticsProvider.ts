@@ -135,11 +135,6 @@ class DiagnosticsProvider extends AbstractSupport {
         this._diagnostics = vscode.languages.createDiagnosticCollection('csharp');
         this._suppressHiddenDiagnostics = vscode.workspace.getConfiguration('csharp').get('suppressHiddenDiagnostics', true);
 
-        this._subscriptions.push(this._validateCurrentDocumentPipe
-            .asObservable()
-            .pipe(throttleTime(750))
-            .subscribe(async x => await this._validateDocument(x)));
-
         this._subscriptions.push(this._validateAllPipe
             .asObservable()
             .pipe(throttleTime(3000))
@@ -152,18 +147,31 @@ class DiagnosticsProvider extends AbstractSupport {
                 }
             }));
 
+        this._subscriptions.push(this._validateCurrentDocumentPipe
+            .asObservable()
+            .pipe(throttleTime(750))
+            .subscribe(async x => await this._validateDocument(x)));
 
-        this._disposable = new CompositeDisposable(this._diagnostics,
-            this._server.onPackageRestore(() => this._validateAllPipe.next(), this),
-            this._server.onProjectChange(() => this._validateAllPipe.next(), this),
-            this._server.onProjectDiagnosticStatus(this._onProjectAnalysis, this),
-            this._server.onDiagnostic(this._onDiagnosticUpdate, this),
-            vscode.workspace.onDidOpenTextDocument(event => this._onDocumentOpenOrChange(event), this),
-            vscode.workspace.onDidChangeTextDocument(event => this._onDocumentOpenOrChange(event.document), this),
-            vscode.workspace.onDidCloseTextDocument(this._onDocumentClose, this),
-            vscode.window.onDidChangeActiveTextEditor(event => this._onDidChangeActiveTextEditor(event), this),
-            vscode.window.onDidChangeWindowState(event => this._OnDidChangeWindowState(event), this),
-        );
+        if (this._analyzersEnabled) {
+            this._disposable = new CompositeDisposable(this._diagnostics,
+                this._server.onProjectDiagnosticStatus(this._onProjectAnalysis, this),
+                this._server.onDiagnostic(this._onDiagnosticUpdate, this),
+                vscode.window.onDidChangeActiveTextEditor(event => this._onDidChangeActiveTextEditor(event), this),
+                vscode.window.onDidChangeWindowState(event => this._OnDidChangeWindowState(event), this),
+            );
+        } else {
+            this._disposable = new CompositeDisposable(this._diagnostics,
+                this._server.onPackageRestore(() => this._validateAllPipe.next(), this),
+                this._server.onProjectChange(() => this._validateAllPipe.next(), this),
+                this._server.onProjectDiagnosticStatus(this._onProjectAnalysis, this),
+                this._server.onDiagnostic(this._onDiagnosticUpdate, this),
+                vscode.workspace.onDidOpenTextDocument(event => this._onDocumentOpenOrChange(event), this),
+                vscode.workspace.onDidChangeTextDocument(event => this._onDocumentOpenOrChange(event.document), this),
+                vscode.workspace.onDidCloseTextDocument(this._onDocumentClose, this),
+                vscode.window.onDidChangeActiveTextEditor(event => this._onDidChangeActiveTextEditor(event), this),
+                vscode.window.onDidChangeWindowState(event => this._OnDidChangeWindowState(event), this),
+            );
+        }
     }
 
     public dispose = () => {
