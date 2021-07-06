@@ -135,18 +135,6 @@ class DiagnosticsProvider extends AbstractSupport {
         this._diagnostics = vscode.languages.createDiagnosticCollection('csharp');
         this._suppressHiddenDiagnostics = vscode.workspace.getConfiguration('csharp').get('suppressHiddenDiagnostics', true);
 
-        this._subscriptions.push(this._validateAllPipe
-            .asObservable()
-            .pipe(throttleTime(3000))
-            .subscribe(async () => {
-                if (this._validationAdvisor.shouldValidateAll()) {
-                    await this._validateEntireWorkspace();
-                }
-                else if (this._validationAdvisor.shouldValidateFiles()) {
-                    await this._validateOpenDocuments();
-                }
-            }));
-
         this._subscriptions.push(this._validateCurrentDocumentPipe
             .asObservable()
             .pipe(throttleTime(750))
@@ -160,6 +148,18 @@ class DiagnosticsProvider extends AbstractSupport {
                 vscode.window.onDidChangeWindowState(event => this._OnDidChangeWindowState(event), this),
             );
         } else {
+            this._subscriptions.push(this._validateAllPipe
+                .asObservable()
+                .pipe(throttleTime(3000))
+                .subscribe(async () => {
+                    if (this._validationAdvisor.shouldValidateAll()) {
+                        await this._validateEntireWorkspace();
+                    }
+                    else if (this._validationAdvisor.shouldValidateFiles()) {
+                        await this._validateOpenDocuments();
+                    }
+                }));
+
             this._disposable = new CompositeDisposable(this._diagnostics,
                 this._server.onPackageRestore(() => this._validateAllPipe.next(), this),
                 this._server.onProjectChange(() => this._validateAllPipe.next(), this),
