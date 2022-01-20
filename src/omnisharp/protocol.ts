@@ -619,6 +619,7 @@ export namespace V2 {
 
     export interface SemanticHighlightRequest extends Request {
         Range?: Range;
+        VersionedText?: string;
     }
 
     export interface SemanticHighlightResponse {

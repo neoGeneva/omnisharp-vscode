@@ -158,7 +158,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<CSharp
     eventStream.subscribe(telemetryObserver.post);
 
     let networkSettingsProvider = vscodeNetworkSettingsProvider(vscode);
-    let installDependencies: IInstallDependencies = async (dependencies: AbsolutePathPackage[]) => downloadAndInstallPackages(dependencies, networkSettingsProvider, eventStream, isValidDownload);
+    const useFramework = optionProvider.GetLatestOptions().useModernNet !== true;
+    let installDependencies: IInstallDependencies = async (dependencies: AbsolutePathPackage[]) => downloadAndInstallPackages(dependencies, networkSettingsProvider, eventStream, isValidDownload, useFramework);
     let runtimeDependenciesExist = await ensureRuntimeDependencies(extension, eventStream, platformInfo, installDependencies);
 
     // activate language services
@@ -220,7 +221,8 @@ function isSupportedPlatform(platform: PlatformInformation): boolean {
     if (platform.isLinux()) {
         return platform.architecture === "x86_64" ||
             platform.architecture === "x86" ||
-            platform.architecture === "i686";
+            platform.architecture === "i686" ||
+            platform.architecture === "arm64";
     }
 
     return false;
